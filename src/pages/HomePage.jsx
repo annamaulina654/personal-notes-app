@@ -1,39 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import NoteList from '../components/NoteList';
 import SearchBar from '../components/SearchBar';
+import Loading from '../components/Loading';
+import { getActiveNotes } from '../utils/network-data';
+import LocaleContext from '../contexts/LocaleContext';
+import content from '../utils/content';
 import { MdAdd } from 'react-icons/md';
 
-function HomePage({ notes }) {
+function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { locale } = useContext(LocaleContext);
+
   const keyword = searchParams.get('keyword') || '';
+
+  useEffect(() => {
+    getActiveNotes().then(({ data }) => {
+      setNotes(data);
+      setLoading(false);
+    });
+  }, []);
 
   const onKeywordChangeHandler = (keyword) => {
     setSearchParams({ keyword });
   };
 
   const filteredNotes = notes.filter((note) => {
-    return !note.archived && note.title.toLowerCase().includes(keyword.toLowerCase());
+    return note.title.toLowerCase().includes(keyword.toLowerCase());
   });
 
   return (
     <section>
-      <h2>Catatan Aktif</h2>
+      {loading && <Loading />}
+      <h2>{content[locale].home.title}</h2>
       <SearchBar keyword={keyword} keywordChange={onKeywordChangeHandler} />
-      <NoteList notes={filteredNotes} emptyMessage="Tidak ada catatan aktif saat ini." />
       
+      {filteredNotes.length > 0 ? (
+        <NoteList notes={filteredNotes} />
+      ) : (
+        !loading && <p className="notes-list__empty-message">
+          {content[locale].home.empty}
+        </p>
+      )}
+
       <div className="fab-container">
-        <Link to="/notes/new" className="fab" title="Tambah Catatan Baru">
+        <Link to="/notes/new" className="fab" title={content[locale].add.title}>
           <MdAdd />
         </Link>
       </div>
     </section>
   );
 }
-
-HomePage.propTypes = {
-  notes: PropTypes.arrayOf(PropTypes.object).isRequired,
-};
 
 export default HomePage;

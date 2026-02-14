@@ -1,14 +1,18 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { MdSearch } from 'react-icons/md';
+import LocaleContext from '../contexts/LocaleContext';
+import content from '../utils/content';
 
 function SearchBar({ keyword, keywordChange }) {
+  const { locale } = useContext(LocaleContext);
+
   return (
     <div className="search-bar">
       <MdSearch className="search-icon" />
       <input
         type="text"
-        placeholder="Cari catatan berdasarkan judul..."
+        placeholder={content[locale].home.searchPlaceholder}
         value={keyword}
         onChange={(event) => keywordChange(event.target.value)}
       />

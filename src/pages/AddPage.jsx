@@ -1,30 +1,34 @@
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PropTypes from 'prop-types';
-import { MdCheck, MdArrowBack } from 'react-icons/md';
+import { addNote } from '../utils/network-data';
+import useInput from '../hooks/useInput';
+import LocaleContext from '../contexts/LocaleContext';
+import content from '../utils/content';
+import { MdArrowBack, MdCheck } from 'react-icons/md';
 
-function AddPage({ onAdd }) {
+function AddPage() {
   const navigate = useNavigate();
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
+  const { locale } = useContext(LocaleContext);
+  const [title, onTitleChange] = useInput('');
+  const [body, setBody] = React.useState('');
 
-  const onInputHandler = (event) => {
+  const onInputBodyHandler = (event) => {
     setBody(event.target.innerHTML);
   };
 
-  const onSubmitHandler = (event) => {
+  const onSubmitHandler = async (event) => {
     event.preventDefault();
-    onAdd({ title, body });
+    await addNote({ title, body });
     navigate('/');
   };
 
   return (
     <section>
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-         <button className="btn-icon" onClick={() => navigate(-1)} title="Kembali" style={{width: '40px', height: '40px'}}>
+         <button className="btn-icon" onClick={() => navigate(-1)} title={content[locale].detail.back}>
             <MdArrowBack />
          </button>
-         <h2 style={{margin: 0}}>Buat Catatan Baru</h2>
+         <h2 style={{margin: 0}}>{content[locale].add.title}</h2>
       </div>
       
       <form onSubmit={onSubmitHandler}>
@@ -32,22 +36,22 @@ function AddPage({ onAdd }) {
           <input
             className="input"
             type="text"
-            placeholder="Judul catatan di sini..."
+            placeholder={content[locale].add.titlePlaceholder}
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={onTitleChange}
             required
             autoFocus
           />
           <div
             className="add-new-page__input__body"
-            data-placeholder="Tuliskan isi catatanmu di sini..."
+            data-placeholder={content[locale].add.bodyPlaceholder}
             contentEditable
-            onInput={onInputHandler}
+            onInput={onInputBodyHandler}
             suppressContentEditableWarning={true}
           />
         </div>
         <div className="fab-container">
-            <button type="submit" className="fab" title="Simpan Catatan">
+            <button type="submit" className="fab" title={content[locale].add.save}>
                 <MdCheck />
             </button>
         </div>
@@ -55,9 +59,5 @@ function AddPage({ onAdd }) {
     </section>
   );
 }
-
-AddPage.propTypes = {
-  onAdd: PropTypes.func.isRequired,
-};
 
 export default AddPage;
